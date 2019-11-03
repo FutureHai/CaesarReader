@@ -26,16 +26,16 @@ options = {
         'packages':packages,  
         'include_files': include_files  
     },  
-
+  
 }  
 
-setup(
-    name = "prog",
-    options = options,
-    version = "1.0",
-    description = 'desc of program',
-    executables = executables
-)
-
-# 执行以下命令打包
+setup(  
+    name = "prog",  
+    options = options,  
+    version = "1.0",  
+    description = 'desc of program',  
+    executables = executables  
+)  
+  
+执行以下命令打包  
  python setup.py build
