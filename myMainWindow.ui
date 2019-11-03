@@ -1,0 +1,640 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>myMainWindow</class>
+ <widget class="QMainWindow" name="myMainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>800</width>
+    <height>600</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>800</width>
+    <height>600</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QTabWidget" name="tabWidget">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>500</width>
+      <height>380</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>500</width>
+      <height>380</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>500</width>
+      <height>380</height>
+     </size>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="logTab">
+     <attribute name="title">
+      <string>日志</string>
+     </attribute>
+     <widget class="QTextBrowser" name="logTxtBr">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>500</width>
+        <height>352</height>
+       </rect>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>500</width>
+        <height>352</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>500</width>
+        <height>352</height>
+       </size>
+      </property>
+      <property name="lineWidth">
+       <number>1</number>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="linkTab">
+     <attribute name="title">
+      <string>链接</string>
+     </attribute>
+     <widget class="QTextBrowser" name="linkTxtBr">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>500</width>
+        <height>352</height>
+       </rect>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>500</width>
+        <height>352</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>500</width>
+        <height>352</height>
+       </size>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="Line" name="line">
+    <property name="geometry">
+     <rect>
+      <x>499</x>
+      <y>22</y>
+      <width>4</width>
+      <height>550</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <strikeout>false</strikeout>
+      <kerning>true</kerning>
+     </font>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Sunken</enum>
+    </property>
+    <property name="lineWidth">
+     <number>1</number>
+    </property>
+    <property name="midLineWidth">
+     <number>0</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="configGBox">
+    <property name="geometry">
+     <rect>
+      <x>503</x>
+      <y>15</y>
+      <width>295</width>
+      <height>555</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+      <underline>false</underline>
+      <strikeout>false</strikeout>
+      <kerning>true</kerning>
+     </font>
+    </property>
+    <property name="title">
+     <string>全局配置</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>40</y>
+       <width>110</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>只在</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="startTimeEdit">
+     <property name="geometry">
+      <rect>
+       <x>115</x>
+       <y>40</y>
+       <width>35</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_2">
+     <property name="geometry">
+      <rect>
+       <x>160</x>
+       <y>40</y>
+       <width>40</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>点 -</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>40</y>
+       <width>50</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>点运行</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="endTimeEdit">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>40</y>
+       <width>35</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_4">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>70</y>
+       <width>110</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>浏览后停顿时间</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="pauseTimeFromEdit">
+     <property name="geometry">
+      <rect>
+       <x>115</x>
+       <y>70</y>
+       <width>35</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_5">
+     <property name="geometry">
+      <rect>
+       <x>160</x>
+       <y>70</y>
+       <width>40</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>秒 -</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="pauseTimeToEdit">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>70</y>
+       <width>35</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_6">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>70</y>
+       <width>50</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>秒</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="slipTimesFromEdit">
+     <property name="geometry">
+      <rect>
+       <x>115</x>
+       <y>100</y>
+       <width>35</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_7">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>100</y>
+       <width>110</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>设置下滑次数</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_8">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>100</y>
+       <width>50</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>次</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_9">
+     <property name="geometry">
+      <rect>
+       <x>160</x>
+       <y>100</y>
+       <width>40</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>次 -</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="slipTimesToEdit">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>100</y>
+       <width>35</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_10">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>240</y>
+       <width>110</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>谷歌启动路径：</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="chromeLocationEdit">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>260</y>
+       <width>251</width>
+       <height>21</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="saveConfigBtn">
+     <property name="geometry">
+      <rect>
+       <x>180</x>
+       <y>150</y>
+       <width>93</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>保存设置</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="startReadBtn">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>500</y>
+       <width>93</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>载入连接</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="stopReadBtn">
+     <property name="geometry">
+      <rect>
+       <x>180</x>
+       <y>500</y>
+       <width>93</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>停止任务</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="addContentBtn">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>450</y>
+       <width>93</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>新增内容</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_11">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>350</y>
+       <width>261</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>注意：不要直接关闭浏览器，请使用</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_12">
+     <property name="geometry">
+      <rect>
+       <x>65</x>
+       <y>380</y>
+       <width>141</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>“停止任务”按钮</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="Line" name="line_2">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>570</y>
+      <width>800</width>
+      <height>3</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="pppoeGBox">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>385</y>
+      <width>498</width>
+      <height>184</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>拨号设置</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+    <widget class="QLabel" name="accountLbl">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>50</y>
+       <width>75</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>连接账号：</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="passwordLbl">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>80</y>
+       <width>75</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>连接密码：</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="accountEdit">
+     <property name="geometry">
+      <rect>
+       <x>110</x>
+       <y>50</y>
+       <width>120</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="passwordEdit">
+     <property name="geometry">
+      <rect>
+       <x>110</x>
+       <y>80</y>
+       <width>120</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_15">
+     <property name="geometry">
+      <rect>
+       <x>250</x>
+       <y>50</y>
+       <width>75</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>当前状态：</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_16">
+     <property name="geometry">
+      <rect>
+       <x>250</x>
+       <y>80</y>
+       <width>75</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>当前IP：</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="pppoeStatusLbl">
+     <property name="geometry">
+      <rect>
+       <x>330</x>
+       <y>50</y>
+       <width>120</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="pppoeIpLbl">
+     <property name="geometry">
+      <rect>
+       <x>330</x>
+       <y>80</y>
+       <width>120</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="connectPppoeBtn">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>130</y>
+       <width>93</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>开始拨号</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="disconnectPppoeBtn">
+     <property name="geometry">
+      <rect>
+       <x>140</x>
+       <y>130</y>
+       <width>93</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>连接断开</string>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
