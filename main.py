@@ -1,19 +1,19 @@
-import random
+import json
 import subprocess
 import sys, os
+from random import random
+
+import win32ras
 
 if hasattr(sys, 'frozen'):
     os.environ['PATH'] = sys._MEIPASS + ";" + os.environ['PATH']
-import time
-import json
-import win32ras
 from PyQt5.QtCore import QThread, pyqtSignal, QRunnable, QThreadPool
 
 from myMainWindow import *
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from selenium import webdriver
 from selenium.webdriver.common.touch_actions import TouchActions
-from time import sleep
+from time import sleep, time
 
 
 class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
