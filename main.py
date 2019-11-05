@@ -1,7 +1,7 @@
 import json
+import random
 import subprocess
 import sys, os
-from random import random
 
 import win32ras
 
@@ -13,7 +13,7 @@ from myMainWindow import *
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from selenium import webdriver
 from selenium.webdriver.common.touch_actions import TouchActions
-from time import sleep, time
+from time import sleep
 
 
 class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
@@ -215,8 +215,15 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
                 hasNum = hasNum + 1
             else:
                 break
+
         self.driver.quit()
-        self.print_log("第 %d 篇阅读完成，共下滑 %d 次\n" % (self.readNum, hasNum))
+
+        if self.stopReadFlag:
+            self.print_log("第 %d 篇阅未完成，共下滑 %d 次\n" % (self.readNum, hasNum))
+            return
+        else:
+            self.print_log("第 %d 篇阅读完成，共下滑 %d 次\n" % (self.readNum, hasNum))
+
         try:
             # 删除第一行
             with open(os.path.abspath('unread.txt'), 'r', encoding='utf-8') as f:
@@ -246,13 +253,13 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
                 self.show_ip_address(p[0])
                 if self.disconnect_pppoe(p[0]) == "success":
                     self.print_log("宽带%s已经断开" % p[1])
-                time.sleep(3)
+                sleep(3)
         else:
             try:
                 pid, res = self.dial_broadband()
                 if res == 0:
                     self.show_ip_address(pid)
-                time.sleep(3)
+                sleep(3)
             except Exception as ee:
                 pass
         pass
@@ -304,7 +311,7 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
                 else:
                     self.print_log("拨号失败，3秒后重试")
                     self.pppoeIpLbl.setText("正在重试")
-                    time.sleep(3)
+                    sleep(3)
                     return self.dial_broadband()
         except Exception as e:
             self.print_log("拨号异常" + str(e))
@@ -319,7 +326,7 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
                 return "success"
             except Exception as e:
                 self.print_log("宽带断开失败，3秒后重试")
-                time.sleep(3)
+                sleep(3)
                 return self.disconnect_pppoe(handle)
         else:
             self.print_log("宽带断开异常")
