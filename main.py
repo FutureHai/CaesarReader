@@ -24,6 +24,10 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
         self.driver = None
         self.stopReadFlag = False
         self.stopPPPOEFlag = False
+        # 已完成文章篇数
+        self.readNum = 0
+        # 剩余文章篇数
+        self.unReadNum = 0
         self.driverThread = DriverThread(self)
         self.pppoeThread = PPPOETask(self)
 
@@ -93,10 +97,10 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
             'slipTimesTo': slipTimesTo,
             'pxFrom': pxFrom,
             'pxTo': pxTo,
-            'chromeLocationEdit': chromeLocation.replace("\\", "\\\\")
+            'chromeLocation': chromeLocation
         }
 
-        with open(os.path.abspath('config.ini'), 'w') as f:
+        with open(os.path.abspath('config.ini'), 'w', encoding='utf-8') as f:
             f.write(json.dumps(configObj))
             f.flush()
             f.close()
@@ -173,7 +177,14 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
         构建阅读driver
         :return:
         """
-        self.print_log("开始阅读 %s" % url)
+        if not url:
+            self.stopReadFlag = True
+            self.print_log("已全部阅读完成\n")
+            return
+
+        self.readNum = self.readNum + 1
+        self.print_log("开始阅读第 %d 篇，剩余 %d 篇" % (self.readNum, self.unReadNum))
+        self.print_log("当前：%s" % url)
         mobileEmulation = {"deviceMetrics": {"width": 320, "height": 640, "pixelRatio": 3.0},
                            "userAgent": 'Mozilla/5.0 (Linux; Android 4.1.1; GT-N7100 Build/JRO03C) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/35.0.1916.138 Mobile Safari/537.36 T7/6.3'}
         # mobileEmulation = {'deviceName': 'Apple iPhone 5'}
@@ -196,7 +207,7 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
             if not self.stopReadFlag:
                 holdTime = random.randint(int(self.pauseTimeFromEdit.text()), int(self.pauseTimeToEdit.text()))
                 px = random.randint(int(self.pxFromEdit.text()), int(self.pxToEdit.text()))
-                self.print_log("第 %d 次下滑，等待 %d 秒, 下滑 %dpx" % (n + 1, holdTime, px))
+                self.print_log("第 %d 次下滑，等待 %d 秒, 下滑 %d 像素" % (n + 1, holdTime, px))
                 # 每次下滑停顿时间
                 sleep(holdTime)
                 action = TouchActions(self.driver)
@@ -205,7 +216,23 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
             else:
                 break
         self.driver.quit()
-        self.print_log("阅读完成，共下滑 %d 次\n" % hasNum)
+        self.print_log("第 %d 篇阅读完成，共下滑 %d 次\n" % (self.readNum, hasNum))
+        try:
+            # 删除第一行
+            with open(os.path.abspath('unread.txt'), 'r', encoding='utf-8') as f:
+                content = f.readlines()
+                with open(os.path.abspath('unread.txt'), 'w+', encoding='utf-8') as f1:
+                    f1.writelines(content[1:])
+                    f1.flush()
+                    f1.close()
+                f.close()
+
+            # 追加到最后一行
+            with open(os.path.abspath('read.txt'), 'a', encoding='utf-8') as f:
+                f.write(url)
+                f.close()
+        except Exception as e:
+            print(e)
         pass
 
     def build_pppoe(self):
@@ -244,6 +271,9 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
             print(msg)
         pass
 
+    def setUnReadNum(self, num):
+        self.unReadNum = num
+
     def connect_pppoe(self, dialname, account, passwd):
         dial_params = (dialname, '', '', account, passwd, '')
         return win32ras.Dial(None, None, dial_params, None)
@@ -269,9 +299,11 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
             else:
                 if self.stopPPPOEFlag:
                     self.print_log("拨号失败")
+                    self.pppoeIpLbl.setText("拨号失败")
                     return -1, -1
                 else:
                     self.print_log("拨号失败，3秒后重试")
+                    self.pppoeIpLbl.setText("正在重试")
                     time.sleep(3)
                     return self.dial_broadband()
         except Exception as e:
@@ -335,7 +367,7 @@ class InitConfigTask(QRunnable):
 
     def run(self):
         try:
-            with open(os.path.abspath('config.ini'), 'r') as f:
+            with open(os.path.abspath('config.ini'), 'r', encoding='utf-8') as f:
                 configJson = f.read()
                 configDic = json.loads(configJson)
                 self.window.startTimeEdit.setText(configDic["startTime"])
@@ -347,6 +379,7 @@ class InitConfigTask(QRunnable):
                 self.window.pxFromEdit.setText(configDic["pxFrom"])
                 self.window.pxToEdit.setText(configDic["pxTo"])
                 self.window.chromeLocationEdit.setText(configDic["chromeLocation"])
+                f.close()
         except Exception as e:
             print(e)
         pass
@@ -362,7 +395,21 @@ class DriverThread(QThread):
 
     def run(self):
         # 获取下一篇文章
-        self.window.build_driver('https://www.baidu.com')
+        url = ""
+        try:
+            with open(os.path.abspath('unread.txt'), 'r', encoding='utf-8') as f:  # 打开文件
+                lines = f.readlines()  # 读取所有行
+                lth = len(lines)
+                if lth > 0:
+                    url = lines[0]  # 取第一行
+                    self.window.setUnReadNum(lth - 1)
+                else:
+                    self.window.setUnReadNum(0)
+                f.close()
+        except Exception as e:
+            pass
+
+        self.window.build_driver(url)
         self.trigger.emit()
         pass
 
