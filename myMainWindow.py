@@ -223,4 +223,4 @@ class Ui_myMainWindow(object):
         self.label_15.setText(_translate("myMainWindow", "当前状态："))
         self.label_16.setText(_translate("myMainWindow", "当前IP："))
         self.connectPppoeBtn.setText(_translate("myMainWindow", "开始拨号"))
-        self.disconnectPppoeBtn.setText(_translate("myMainWindow", "连接断开"))
+        self.disconnectPppoeBtn.setText(_translate("myMainWindow", "断开连接"))

@@ -1,5 +1,7 @@
+import random
 import subprocess
 import sys, os
+
 if hasattr(sys, 'frozen'):
     os.environ['PATH'] = sys._MEIPASS + ";" + os.environ['PATH']
 import time
@@ -15,33 +17,35 @@ from time import sleep
 
 
 class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
-    chromeDriverPath = os.path.abspath('chromedriver.exe')
-    driver = None
-
     def __init__(self, parent=None):
         super(CaesarReaderWindow, self).__init__(parent)
 
+        self.chromeDriverPath = os.path.abspath('chromedriver.exe')
+        self.driver = None
+        self.stopReadFlag = False
+        self.stopPPPOEFlag = False
+        self.driverThread = DriverThread(self)
+        self.pppoeThread = PPPOETask(self)
+
         self.setupUi(self)
-        self.connectPppoeBtn.clicked.connect(self.connect_pppoe)
-        self.disconnectPppoeBtn.clicked.connect(self.disconnect_pppoe)
+        self.connectPppoeBtn.clicked.connect(self.connect_pppoe_click)
+        self.disconnectPppoeBtn.clicked.connect(self.disconnect_pppoe_click)
         self.saveConfigBtn.clicked.connect(self.save_config_click)
         self.startReadBtn.clicked.connect(self.start_read_click)
         self.stopReadBtn.clicked.connect(self.end_read_click)
         self.init_config()
 
     def init_config(self):
+        """
+        初始化全局配置
+        :return:
+        """
         try:
             initConfigTask = InitConfigTask(self)
             pool = QThreadPool.globalInstance()
             pool.start(initConfigTask)
         except Exception as e:
             self.print_log(str(e))
-        pass
-
-    def connect_pppoe(self):
-        pp = PPPOETask(self)
-        pool = QThreadPool.globalInstance()
-        pool.start(pp)
         pass
 
     def popen(self, cmd):
@@ -53,10 +57,6 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
         except BaseException as e:
             self.print_log(str(e))
             return -1
-
-    def disconnect_pppoe(self):
-
-        pass
 
     def save_config_click(self):
         """
@@ -77,7 +77,7 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
             'pauseTimeTo': pauseTimeTo,
             'slipTimesFrom': slipTimesFrom,
             'slipTimesTo': slipTimesTo,
-            'chromeLocationEdit': chromeLocation
+            'chromeLocationEdit': chromeLocation.replace("\\", "\\\\")
         }
 
         with open(os.path.abspath('config.ini'), 'w') as f:
@@ -88,27 +88,76 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
 
     def start_read_click(self):
         """
-        开始阅读
+        开始阅读按钮点击
         :return:
+        """
 
+        self.stopReadFlag = False
         try:
-            driverThread = DriverThread()
-            driverThread.trigger.connect(self.build_driver)
-            driverThread.start()
+            if not self.driverThread.isRunning():
+                self.driverThread.trigger.connect(self.reconnect_pppoe)
+                self.driverThread.start()
         except Exception as e:
-            self.print_log(e)
-        pass
-         """
-        self.build_driver()
+            self.print_log(str(e))
         pass
 
     def end_read_click(self):
-        if self.driver:
-            self.driver.quit()
+        """
+        停止阅读按钮点击
+        :return:
+        """
+        self.stopReadFlag = True
         pass
 
-    def build_driver(self):
-        print("aaaaaaaaaaaaaaa")
+    def connect_pppoe_click(self):
+        """
+        开始拨号按钮点击
+        :return:
+        """
+        self.stopPPPOEFlag = False
+        try:
+            if not self.pppoeThread.isRunning():
+                self.pppoeThread.trigger.connect(self.read_next)
+                self.pppoeThread.start()
+        except Exception as e:
+            self.print_log(str(e))
+        pass
+
+    def disconnect_pppoe_click(self):
+        """
+        停止拨号按钮点击
+        :return:
+        """
+        self.stopPPPOEFlag = True
+        pass
+
+    def read_next(self):
+        """
+        阅读下一篇
+        :return:
+        """
+        if self.stopReadFlag or self.stopPPPOEFlag:
+            return
+
+        self.start_read_click()
+        pass
+
+    def reconnect_pppoe(self):
+        """
+        重新连接pppoe
+        :return:
+        """
+        if self.stopReadFlag or self.stopPPPOEFlag:
+            return
+        self.connect_pppoe_click()
+        pass
+
+    def build_driver(self, url):
+        """
+        构建阅读driver
+        :return:
+        """
+        self.print_log("开始阅读 %s" % url)
         mobileEmulation = {"deviceMetrics": {"width": 320, "height": 640, "pixelRatio": 3.0},
                            "userAgent": 'Mozilla/5.0 (Linux; Android 4.1.1; GT-N7100 Build/JRO03C) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/35.0.1916.138 Mobile Safari/537.36 T7/6.3'}
         # mobileEmulation = {'deviceName': 'Apple iPhone 5'}
@@ -121,24 +170,55 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
         chrome_options.add_experimental_option('mobileEmulation', mobileEmulation)
         chrome_options.add_experimental_option("excludeSwitches", ['enable-automation'])
         chrome_options.add_experimental_option('w3c', False)
-        print("bbbbbbbbbbbbbbbbb")
         self.driver = webdriver.Chrome(executable_path=self.chromeDriverPath, options=chrome_options)
         # 操作这个对象.
-        self.driver.get('https://www.baidu.com')
-        sleep(3)
-        print("ccccccccccccccccccc")
-        action = TouchActions(self.driver)
-        action.scroll(0, 200).perform()
-        sleep(3)
-        action.scroll(0, 200).perform()
-        sleep(3)
-        action.scroll(0, 200).perform()
-        # driver.get('https://www.oceanbluecloud.com')
-        sleep(3)
-        #driver.quit()
+        self.driver.get(url)
+        num = random.randint(int(self.slipTimesFromEdit.text()), int(self.slipTimesToEdit.text()))
+        # 下滑次数
+        hasNum = 1
+        for n in range(num):
+            if not self.stopReadFlag:
+                holdTime = random.randint(int(self.pauseTimeFromEdit.text()), int(self.pauseTimeToEdit.text()))
+                self.print_log("第 " + str(n + 1) + " 次下滑，等待 %d 秒" % holdTime)
+                # 每次下滑停顿时间
+                sleep(holdTime)
+                action = TouchActions(self.driver)
+                action.scroll(0, 200).perform()
+                hasNum = hasNum + 1
+            else:
+                break
+        self.print_log("阅读完成，共下滑 %d 次\n" % hasNum)
+        self.driver.quit()
+        pass
+
+    def build_pppoe(self):
+        """
+        构建pppoe
+        :return:
+        """
+        data = self.check_for_broadband()
+        if data is not None:
+            for p in data:
+                self.show_ip_address(p[0])
+                if self.disconnect_pppoe(p[0]) == "success":
+                    self.print_log("宽带%s已经断开" % p[1])
+                time.sleep(3)
+        else:
+            try:
+                pid, res = self.dial_broadband()
+                if res == 0:
+                    self.show_ip_address(pid)
+                time.sleep(3)
+            except Exception as ee:
+                pass
         pass
 
     def print_log(self, message):
+        """
+        异度打印日志
+        :param message: 日志信息
+        :return:
+        """
         try:
             logTask = LogTask(self, message)
             pool = QThreadPool.globalInstance()
@@ -147,64 +227,67 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
             print(msg)
         pass
 
-    def print_log_sync(self, message):
-        self.logTxtBr.append(message)
-        self.logTxtBr.moveCursor(self.logTxtBr.textCursor().End)  # 光标移到最后，这样就会自动显示出来
-        pass
-
-    def ConnectPPPOE(self, dialname, account, passwd):
+    def connect_pppoe(self, dialname, account, passwd):
         dial_params = (dialname, '', '', account, passwd, '')
         return win32ras.Dial(None, None, dial_params, None)
 
-    def DialBroadband(self):
+    def dial_broadband(self):
+        """
+        宽带拨号
+        :return:
+        """
+        self.pppoeIpLbl.setText("正在拨号...")
         dialname = '宽带连接'  # just a name
         account = self.accountEdit.text()
         passwd = self.passwordEdit.text()
-        self.print_log_sync("begin connect! account:" + account + " password:" + passwd)
+        self.print_log("正在拨号")
         try:
             # handle is a pid, for disconnect or showipadrress, if connect success return 0.
             # account is the username that your ISP supposed, passwd is the password.
-            handle, result = self.ConnectPPPOE(dialname, account, passwd)
+            handle, result = self.connect_pppoe(dialname, account, passwd)
             if result == 0:
-                self.print_log_sync("Connection success!")
+                self.print_log("拨号成功")
+                self.pppoeIpLbl.setText("拨号成功")
                 return handle, result
             else:
-                print("Connection failed, wait for 5 seconds and try again...")
-                self.print_log_sync("Connection failed, wait for 5 seconds and try again...")
-                time.sleep(5)
-                #self.DialBroadband()
-                return -1, -1
+                if self.stopPPPOEFlag:
+                    self.print_log("拨号失败")
+                    return -1, -1
+                else:
+                    self.print_log("拨号失败，3秒后重试")
+                    time.sleep(3)
+                    return self.dial_broadband()
         except Exception as e:
-            self.print_log_sync("Can't finish this connection, please check out." + str(e))
+            self.print_log("拨号异常" + str(e))
             return -1, -1
 
-    def DisconnectPPPOE(self, handle):
-        self.print_log_sync("Disconnection start!")
+    def disconnect_pppoe(self, handle):
+        self.print_log("正在断开宽带!")
         if handle is not None:
             try:
                 win32ras.HangUp(handle)
-                self.print_log_sync("Disconnection success!")
+                self.print_log("宽带断开成功!")
                 return "success"
             except Exception as e:
-                self.print_log_sync("Disconnection failed, wait for 5 seconds and try again...")
-                time.sleep(5)
-                self.DisconnectPPPOE(handle)
+                self.print_log("宽带断开失败，3秒后重试")
+                time.sleep(3)
+                return self.disconnect_pppoe(handle)
         else:
-            self.print_log_sync("Can't find the process!")
-            return
+            self.print_log("宽带断开异常")
+            return "fail"
 
-    def Check_for_Broadband(self):
+    def check_for_broadband(self):
         connections = win32ras.EnumConnections()
         if len(connections) == 0:
-            self.print_log_sync("The system is not running any broadband connection.")
+            self.print_log("系统未运行任何宽带连接")
             return
         else:
-            self.print_log_sync("The system is running %d broadband connection." % len(connections))
+            self.print_log("系统正在运行%d个宽带连接" % len(connections))
             return connections
 
-    def ShowIpAddress(self, handle):
-        #self.print_log_sync(str(win32ras.GetConnectStatus(handle)))
-        self.print_log_sync("ready ipconfig")
+    def show_ip_address(self, handle):
+        self.print_log("ready ipconfig")
+        self.pppoeIpLbl.setText("")
 
         ipconfig_result_list = self.popen('ipconfig')
         if ipconfig_result_list == -1:
@@ -222,7 +305,7 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
                     have_ppp = 0
 
         if ip_str:
-            self.print_log_sync("ip_str is " + ip_str)
+            self.print_log("IP地址为： " + ip_str)
             self.pppoeIpLbl.setText(ip_str)
         pass
 
@@ -253,11 +336,14 @@ class InitConfigTask(QRunnable):
 class DriverThread(QThread):
     trigger = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, window):
         super(DriverThread, self).__init__()
+        self.window = window
         pass
 
     def run(self):
+        # 获取下一篇文章
+        self.window.build_driver('https://www.baidu.com')
         self.trigger.emit()
         pass
 
@@ -275,7 +361,9 @@ class LogTask(QRunnable):
         pass
 
 
-class PPPOETask(QRunnable):
+class PPPOETask(QThread):
+    trigger = pyqtSignal()
+
     def __init__(self, window):
         super(PPPOETask, self).__init__()
         self.window = window
@@ -283,27 +371,10 @@ class PPPOETask(QRunnable):
 
     def run(self):
         try:
-            data = self.window.Check_for_Broadband()
-            # if exist running broadband connection, disconnected it.
-            if data is not None:
-                for p in data:
-                    self.window.print_log_sync("p[0] is " + str(p[0]))
-                    self.window.ShowIpAddress(p[0])
-                    if self.window.DisconnectPPPOE(p[0]) == "success":
-                        self.window.print_log_sync("%s has been disconnected." % p[1])
-                    time.sleep(3)
-            else:
-                try:
-                    pid, res = self.window.DialBroadband()
-                    if res == 0:
-                        self.window.ShowIpAddress(pid)
-                    else:
-                        self.window.print_log_sync(str(pid) + " " + str(res))
-                    time.sleep(3)
-                except Exception as ee:
-                    self.window.print_log_sync(str(ee))
+            self.window.build_pppoe()
+            self.trigger.emit()
         except Exception as e:
-            self.window.print_log_sync(str(e))
+            self.window.print_log(str(e))
         pass
 
 
