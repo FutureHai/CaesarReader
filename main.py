@@ -22,6 +22,7 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
 
         self.chromeDriverPath = os.path.abspath('chromedriver.exe')
         self.driver = None
+        self.startReadFlag = False
         self.stopReadFlag = False
         self.stopPPPOEFlag = False
         # 已完成文章篇数
@@ -111,7 +112,7 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
         开始阅读按钮点击
         :return:
         """
-
+        self.startReadFlag = True
         self.stopReadFlag = False
         try:
             if not self.driverThread.isRunning():
@@ -126,6 +127,7 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
         停止阅读按钮点击
         :return:
         """
+        self.startReadFlag = False
         self.stopReadFlag = True
         pass
 
@@ -156,6 +158,9 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
         阅读下一篇
         :return:
         """
+        if not self.startReadFlag:
+            return
+
         if self.stopReadFlag or self.stopPPPOEFlag:
             return
 

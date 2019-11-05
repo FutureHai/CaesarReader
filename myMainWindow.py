@@ -16,6 +16,9 @@ class Ui_myMainWindow(object):
         myMainWindow.resize(800, 600)
         myMainWindow.setMinimumSize(QtCore.QSize(800, 600))
         myMainWindow.setMaximumSize(QtCore.QSize(800, 600))
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("favicon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        myMainWindow.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(myMainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.tabWidget = QtWidgets.QTabWidget(self.centralwidget)
@@ -226,7 +229,7 @@ class Ui_myMainWindow(object):
 
     def retranslateUi(self, myMainWindow):
         _translate = QtCore.QCoreApplication.translate
-        myMainWindow.setWindowTitle(_translate("myMainWindow", "MainWindow"))
+        myMainWindow.setWindowTitle(_translate("myMainWindow", "CReader"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.logTab), _translate("myMainWindow", "日志"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.linkTab), _translate("myMainWindow", "链接"))
         self.configGBox.setTitle(_translate("myMainWindow", "全局配置"))

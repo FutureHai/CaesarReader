@@ -23,7 +23,11 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>CReader</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>favicon.png</normaloff>favicon.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QTabWidget" name="tabWidget">
