@@ -369,7 +369,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>240</y>
+       <y>160</y>
        <width>110</width>
        <height>21</height>
       </rect>
@@ -382,7 +382,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>260</y>
+       <y>180</y>
        <width>251</width>
        <height>21</height>
       </rect>
@@ -392,7 +392,7 @@
      <property name="geometry">
       <rect>
        <x>180</x>
-       <y>150</y>
+       <y>220</y>
        <width>93</width>
        <height>28</height>
       </rect>
@@ -464,6 +464,74 @@
      </property>
      <property name="text">
       <string>“停止任务”按钮</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_13">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>130</y>
+       <width>50</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>px</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_14">
+     <property name="geometry">
+      <rect>
+       <x>160</x>
+       <y>130</y>
+       <width>40</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>px -</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="pxToEdit">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>130</y>
+       <width>35</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="pxFromEdit">
+     <property name="geometry">
+      <rect>
+       <x>115</x>
+       <y>130</y>
+       <width>35</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_17">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>130</y>
+       <width>110</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>设置下滑像素</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
    </widget>
@@ -601,6 +669,43 @@
        <height>22</height>
       </rect>
      </property>
+     <property name="palette">
+      <palette>
+       <active>
+        <colorrole role="WindowText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>255</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </active>
+       <inactive>
+        <colorrole role="WindowText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>255</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </inactive>
+       <disabled>
+        <colorrole role="WindowText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>120</red>
+           <green>120</green>
+           <blue>120</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </disabled>
+      </palette>
+     </property>
      <property name="text">
       <string/>
      </property>
@@ -628,7 +733,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>连接断开</string>
+      <string>断开连接</string>
      </property>
     </widget>
    </widget>

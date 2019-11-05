@@ -69,7 +69,21 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
         pauseTimeTo = self.pauseTimeToEdit.text()
         slipTimesFrom = self.slipTimesFromEdit.text()
         slipTimesTo = self.slipTimesToEdit.text()
+        pxFrom = self.pxFromEdit.text()
+        pxTo = self.pxToEdit.text()
         chromeLocation = self.chromeLocationEdit.text()
+        if not (
+                startTime and
+                endTime and
+                pauseTimeFrom and
+                pauseTimeTo and
+                slipTimesFrom and
+                slipTimesTo and
+                pxFrom and
+                pxTo and
+                chromeLocation):
+            return
+
         configObj = {
             'startTime': startTime,
             'endTime': endTime,
@@ -77,6 +91,8 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
             'pauseTimeTo': pauseTimeTo,
             'slipTimesFrom': slipTimesFrom,
             'slipTimesTo': slipTimesTo,
+            'pxFrom': pxFrom,
+            'pxTo': pxTo,
             'chromeLocationEdit': chromeLocation.replace("\\", "\\\\")
         }
 
@@ -175,11 +191,12 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
         self.driver.get(url)
         num = random.randint(int(self.slipTimesFromEdit.text()), int(self.slipTimesToEdit.text()))
         # 下滑次数
-        hasNum = 1
+        hasNum = 0
         for n in range(num):
             if not self.stopReadFlag:
                 holdTime = random.randint(int(self.pauseTimeFromEdit.text()), int(self.pauseTimeToEdit.text()))
-                self.print_log("第 " + str(n + 1) + " 次下滑，等待 %d 秒" % holdTime)
+                px = random.randint(int(self.pxFromEdit.text()), int(self.pxToEdit.text()))
+                self.print_log("第 %d 次下滑，等待 %d 秒, 下滑 %dpx" % (n + 1, holdTime, px))
                 # 每次下滑停顿时间
                 sleep(holdTime)
                 action = TouchActions(self.driver)
@@ -187,8 +204,8 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
                 hasNum = hasNum + 1
             else:
                 break
-        self.print_log("阅读完成，共下滑 %d 次\n" % hasNum)
         self.driver.quit()
+        self.print_log("阅读完成，共下滑 %d 次\n" % hasNum)
         pass
 
     def build_pppoe(self):
@@ -327,6 +344,8 @@ class InitConfigTask(QRunnable):
                 self.window.pauseTimeToEdit.setText(configDic["pauseTimeTo"])
                 self.window.slipTimesFromEdit.setText(configDic["slipTimesFrom"])
                 self.window.slipTimesToEdit.setText(configDic["slipTimesTo"])
+                self.window.pxFromEdit.setText(configDic["pxFrom"])
+                self.window.pxToEdit.setText(configDic["pxTo"])
                 self.window.chromeLocationEdit.setText(configDic["chromeLocation"])
         except Exception as e:
             print(e)
