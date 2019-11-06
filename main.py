@@ -14,6 +14,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 from selenium import webdriver
 from selenium.webdriver.common.touch_actions import TouchActions
 from time import sleep
+from selenium.webdriver.chrome.service import Service
 
 
 class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
@@ -21,7 +22,6 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
         super(CaesarReaderWindow, self).__init__(parent)
 
         self.chromeDriverPath = os.path.abspath('chromedriver.exe')
-        self.driver = None
         self.startReadFlag = False
         self.stopReadFlag = False
         self.stopPPPOEFlag = False
@@ -55,7 +55,7 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
 
     def popen(self, cmd):
         try:
-            popen = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+            popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, creationflags=134217728)
             popen.wait()
             lines = popen.stdout.readlines()
             return [line.decode('gbk') for line in lines]
@@ -190,6 +190,10 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
         self.readNum = self.readNum + 1
         self.print_log("开始阅读第 %d 篇，剩余 %d 篇" % (self.readNum, self.unReadNum))
         self.print_log("当前：%s" % url)
+        c_service = Service(self.chromeDriverPath)
+        c_service.command_line_args()
+        c_service.start()
+
         mobileEmulation = {"deviceMetrics": {"width": 320, "height": 640, "pixelRatio": 3.0},
                            "userAgent": 'Mozilla/5.0 (Linux; Android 4.1.1; GT-N7100 Build/JRO03C) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/35.0.1916.138 Mobile Safari/537.36 T7/6.3'}
         # mobileEmulation = {'deviceName': 'Apple iPhone 5'}
@@ -198,13 +202,15 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
         chrome_options.add_argument('--disable-gpu')
         chrome_options.add_argument('--hide-scrollbars')
         chrome_options.add_argument('--disable-javascript')
+        chrome_options.add_argument('--log-level=3')
         chrome_options.binary_location = self.chromeLocationEdit.text()
         chrome_options.add_experimental_option('mobileEmulation', mobileEmulation)
         chrome_options.add_experimental_option("excludeSwitches", ['enable-automation'])
         chrome_options.add_experimental_option('w3c', False)
-        self.driver = webdriver.Chrome(executable_path=self.chromeDriverPath, options=chrome_options)
+        driver = webdriver.Chrome(options=chrome_options)
+
         # 操作这个对象.
-        self.driver.get(url)
+        driver.get(url)
         num = random.randint(int(self.slipTimesFromEdit.text()), int(self.slipTimesToEdit.text()))
         # 下滑次数
         hasNum = 0
@@ -215,13 +221,14 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
                 self.print_log("第 %d 次下滑，等待 %d 秒, 下滑 %d 像素" % (n + 1, holdTime, px))
                 # 每次下滑停顿时间
                 sleep(holdTime)
-                action = TouchActions(self.driver)
+                action = TouchActions(driver)
                 action.scroll(0, 200).perform()
                 hasNum = hasNum + 1
             else:
                 break
 
-        self.driver.quit()
+        driver.quit()
+        c_service.stop()
 
         if self.stopReadFlag:
             self.print_log("第 %d 篇阅未完成，共下滑 %d 次\n" % (self.readNum, hasNum))
