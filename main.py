@@ -22,6 +22,8 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
         super(CaesarReaderWindow, self).__init__(parent)
 
         self.chromeDriverPath = os.path.abspath('chromedriver.exe')
+        self.driver = None
+        self.c_service = None
         self.startReadFlag = False
         self.stopReadFlag = False
         self.stopPPPOEFlag = False
@@ -55,12 +57,12 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
 
     def popen(self, cmd):
         try:
-            popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, creationflags=134217728)
+            popen = subprocess.Popen(cmd, stdout=subprocess.PIPE)
             popen.wait()
             lines = popen.stdout.readlines()
             return [line.decode('gbk') for line in lines]
-        except BaseException as e:
-            self.print_log(str(e))
+        except Exception as e:
+            self.print_log("获取ip异常")
             return -1
 
     def save_config_click(self):
@@ -129,6 +131,20 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
         """
         self.startReadFlag = False
         self.stopReadFlag = True
+
+        try:
+            if self.driver is not None:
+                self.driver.quit()
+                self.driver = None
+        except Exception as msg:
+            pass
+
+        try:
+            if self.c_service is not None:
+                self.c_service.stop()
+                self.c_service = None
+        except Exception as msg:
+            pass
         pass
 
     def connect_pppoe_click(self):
@@ -151,6 +167,14 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
         :return:
         """
         self.stopPPPOEFlag = True
+
+        data = self.check_for_broadband()
+        if data is not None:
+            for p in data:
+                self.show_ip_address()
+                if self.disconnect_pppoe(p[0]) == "success":
+                    self.print_log("宽带%s已经断开" % p[1])
+                sleep(5)
         pass
 
     def read_next(self):
@@ -190,9 +214,9 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
         self.readNum = self.readNum + 1
         self.print_log("开始阅读第 %d 篇，剩余 %d 篇" % (self.readNum, self.unReadNum))
         self.print_log("当前：%s" % url)
-        c_service = Service(self.chromeDriverPath)
-        c_service.command_line_args()
-        c_service.start()
+        self.c_service = Service(self.chromeDriverPath)
+        self.c_service.command_line_args()
+        self.c_service.start()
 
         mobileEmulation = {"deviceMetrics": {"width": 320, "height": 640, "pixelRatio": 3.0},
                            "userAgent": 'Mozilla/5.0 (Linux; Android 4.1.1; GT-N7100 Build/JRO03C) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/35.0.1916.138 Mobile Safari/537.36 T7/6.3'}
@@ -207,10 +231,10 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
         chrome_options.add_experimental_option('mobileEmulation', mobileEmulation)
         chrome_options.add_experimental_option("excludeSwitches", ['enable-automation'])
         chrome_options.add_experimental_option('w3c', False)
-        driver = webdriver.Chrome(options=chrome_options)
+        self.driver = webdriver.Chrome(options=chrome_options)
 
         # 操作这个对象.
-        driver.get(url)
+        self.driver.get(url)
         num = random.randint(int(self.slipTimesFromEdit.text()), int(self.slipTimesToEdit.text()))
         # 下滑次数
         hasNum = 0
@@ -221,14 +245,25 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
                 self.print_log("第 %d 次下滑，等待 %d 秒, 下滑 %d 像素" % (n + 1, holdTime, px))
                 # 每次下滑停顿时间
                 sleep(holdTime)
-                action = TouchActions(driver)
+                action = TouchActions(self.driver)
                 action.scroll(0, 200).perform()
                 hasNum = hasNum + 1
             else:
                 break
 
-        driver.quit()
-        c_service.stop()
+        try:
+            if self.driver is not None:
+                self.driver.quit()
+                self.driver = None
+        except Exception as msg:
+            pass
+
+        try:
+            if self.c_service is not None:
+                self.c_service.stop()
+                self.c_service = None
+        except Exception as msg:
+            pass
 
         if self.stopReadFlag:
             self.print_log("第 %d 篇阅未完成，共下滑 %d 次\n" % (self.readNum, hasNum))
@@ -262,16 +297,16 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
         data = self.check_for_broadband()
         if data is not None:
             for p in data:
-                self.show_ip_address(p[0])
+                self.show_ip_address()
                 if self.disconnect_pppoe(p[0]) == "success":
                     self.print_log("宽带%s已经断开" % p[1])
-                sleep(3)
+                sleep(5)
         else:
             try:
                 pid, res = self.dial_broadband()
                 if res == 0:
-                    self.show_ip_address(pid)
-                sleep(3)
+                    self.show_ip_address()
+                sleep(5)
             except Exception as ee:
                 pass
         pass
@@ -302,7 +337,7 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
         宽带拨号
         :return:
         """
-        self.pppoeIpLbl.setText("正在拨号...")
+        self.pppoeStatusLbl.setText("正在拨号...")
         dialname = '宽带连接'  # just a name
         account = self.accountEdit.text()
         passwd = self.passwordEdit.text()
@@ -313,16 +348,16 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
             handle, result = self.connect_pppoe(dialname, account, passwd)
             if result == 0:
                 self.print_log("拨号成功")
-                self.pppoeIpLbl.setText("拨号成功")
+                self.pppoeStatusLbl.setText("拨号成功")
                 return handle, result
             else:
                 if self.stopPPPOEFlag:
                     self.print_log("拨号失败")
-                    self.pppoeIpLbl.setText("拨号失败")
+                    self.pppoeStatusLbl.setText("拨号失败")
                     return -1, -1
                 else:
                     self.print_log("拨号失败，3秒后重试")
-                    self.pppoeIpLbl.setText("正在重试")
+                    self.pppoeStatusLbl.setText("正在重试")
                     sleep(3)
                     return self.dial_broadband()
         except Exception as e:
@@ -331,17 +366,21 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
 
     def disconnect_pppoe(self, handle):
         self.print_log("正在断开宽带!")
+        self.pppoeStatusLbl.setText("正在断开")
         if handle is not None:
             try:
                 win32ras.HangUp(handle)
                 self.print_log("宽带断开成功!")
+                self.pppoeStatusLbl.setText("断开成功")
                 return "success"
             except Exception as e:
                 self.print_log("宽带断开失败，3秒后重试")
+                self.pppoeStatusLbl.setText("断开失败")
                 sleep(3)
                 return self.disconnect_pppoe(handle)
         else:
             self.print_log("宽带断开异常")
+            self.pppoeStatusLbl.setText("断开失败")
             return "fail"
 
     def check_for_broadband(self):
@@ -353,8 +392,8 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
             self.print_log("系统正在运行%d个宽带连接" % len(connections))
             return connections
 
-    def show_ip_address(self, handle):
-        self.print_log("ready ipconfig")
+    def show_ip_address(self):
+        self.print_log("正在查询IP")
         self.pppoeIpLbl.setText("")
 
         ipconfig_result_list = self.popen('ipconfig')
@@ -372,7 +411,7 @@ class CaesarReaderWindow(QMainWindow, Ui_myMainWindow):
                     ip_str = line.split(":")[1].strip()
                     have_ppp = 0
 
-        if ip_str:
+        if ip_str is not None:
             self.print_log("IP地址为： " + ip_str)
             self.pppoeIpLbl.setText(ip_str)
         pass
