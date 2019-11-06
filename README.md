@@ -3,7 +3,7 @@ pyqt5
 
 ## 1)pyinstall package exe
 
-pyinstaller -D -w -i favicon.ico main.py  
+pyinstaller -D -w -i favicon.ico -n CReader main.py  
 打包时添加以下内容  
 import sys, os  
 if hasattr(sys, 'frozen'):
